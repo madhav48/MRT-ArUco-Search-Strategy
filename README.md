@@ -1,127 +1,356 @@
-# MRT Software Induction Project: Quad-Search Strategy
-*Madhav Agrawal*
+MRT Software Induction Project : Quad-Search Strategy
 
-## Introduction
-In this project, I have worked to enhance our existing ArUco tag search strategy for the URC problem statement.
+Madhav Agrawal
 
-### Problem Statement
-Our primary objective is to locate three posts which have GNSS Coordinates, within a 20-meter radius, each marked with a 3-sided marker displaying an ArUco tag. Once detected, our task is to navigate the rover to stop within 2 meters of each post. Therefore, our focus lies on efficiently searching for and identifying the ArUco tags within the specified radius to ensure accurate navigation and positioning of the rover.
+May 11, 2024
 
-### Current Strategy
-Currently, we are using square search strategy - in which we move the rover recursively to the vertices of squares and perform a 360 degree rotation. However, this year we will use rotating stereo camera to cut down this rotation effort!!
+> **1** **Introduction**
+>
+> In this project, I have worked to enhance our existing ArUco tag
+> search strategy for the URC problem statement.
+>
+> **1.1** **Problem Statement**
+>
+> Our primary objective is to locate three posts which have GNSS
+> Coordinates, within a 20-meter radius, each marked with a 3-sided
+> marker displaying an ArUco tag. Once detected, our task is to navigate
+> the rover to stop within 2 meters of each post. Therefore, our focus
+> lies on efficiently searching for and identifying the ArUco tags
+> within the specified radius to ensure accurate navigation and
+> positioning of the rover.
+>
+> **1.2** **Current Strategy**
+>
+> Currently, we are using square search strategy - in which we move the
+> rover recursively to the vertices of squares and perform a 360 degree
+> rotation. However, this year we will use rotating stereo camera to cut
+> down this rotation effort!!
+>
+> **1.2.1** **Cons of Current Strategy**
+>
+> Some of the major problems that we will be facing in the current
+> strategy are:
+>
+> • Accuracy - There might be some chance that some area is left for
+> scanning.
+>
+> • **Blind spot** - The presence of the pole at the back of the rover
+> creates a blind spot for the rotating stereo-camera, potentially
+> causing it to fail to detect an ArUco tag positioned directly behind
+> the rover.
+>
+> • **Time** - In the long term, the rotation time required for the
+> stereo-camera mount and the ad-justments made to eliminate blind spots
+> are factors that inevitably demand a significant amount of time.
+>
+> **2** **Solutions**
+>
+> To address the mentioned challenges, I suggest the following solutions
+> to simplify and streamline the process of locating ArUco markers, thus
+> making our task more efficient:
+>
+> **2.1** **Strategy - 0 : WebCams**
+>
+> In this proposed solution, we aim to utilize 3 or 4 webcams or
+> standard cameras strategically positioned at angles of either 120° or
+> 90° around the rover. This configuration offers a comprehensive view
+> of the rover's surroundings without the need for camera rotation at
+> each step. By eliminating this rotation process, we effectively reduce
+> the time required for scanning and enhance efficiency in detecting
+> ArUco markers.
 
-#### Cons of Current Strategy
-Some of the major problems that we will be facing in the current strategy are:
+1
 
-- Accuracy - There might be some chance that some area is left for scanning.
-- **Blind spot** - The presence of the pole at the back of the rover creates a blind spot for the rotating stereo-camera, potentially causing it to fail to detect an ArUco tag positioned directly behind the rover.
-- **Time** - In the long term, the rotation time required for the stereo-camera mount and the adjustments made to eliminate blind spots are factors that inevitably demand a significant amount of time.
+![](vertopal_a7e145c60f1b4a3baac6e78eac33cdba/media/image1.png){width="1.533332239720035in"
+height="0.8972211286089239in"}
 
-## Solutions
-To address the mentioned challenges, I suggest the following solutions to simplify and streamline the process of locating ArUco markers, thus making our task more efficient:
+Figure 1: Cameras Setup (Arrow represents webcam)
 
-### Strategy - 0: WebCams
-In this proposed solution, we aim to utilize 3 or 4 webcams or standard cameras strategically positioned at angles of either 120° or 90° around the rover. This configuration offers a comprehensive view of the rover's surroundings without the need for camera rotation at each step. By eliminating this rotation process, we effectively reduce the time required for scanning and enhance efficiency in detecting ArUco markers.
+> **2.1.1** **Implementation**
+>
+> • To minimize complexity, we'll connect all cameras to a Raspberry Pi,
+> leveraging its existing presence in rover and available pins. The
+> Raspberry Pi will process webcam feeds to detect ArUco tags silently
+> and compactly, ensuring streamlined operation.
+>
+> • Upon detecting an ArUco tag, the Raspberry Pi will send a signal to
+> the NUC, the main pro-cessing unit, prompting it to rotate the
+> stereo-camera in the tag's direction to capture depth information.
+>
+> • Simultaneously, the rover will be directed to move towards the tag's
+> location.
+>
+> **2.1.2** **Numbers**
+>
+> • The webcam's accuracy for ArUco detection is sufficient, delivering
+> reliable results up to a min- imum distance of 10 meters.
+>
+> • Given that each camera costs approximately 1k, the overall cost of
+> 3-4k for all cameras is within a reasonable budget range. Therefore,
+> budget constraints are not a significant issue.
+>
+> **2.1.3** **Pros**
+>
+> • Reduce the rotation time of camera/rover.
+>
+> • Provides better range than stereo camera. In case, if we are unable
+> to detect the ArUco marker using stereo-camera, we can still move in
+> the direction in which webcam is detecting it.
+>
+> **2.1.4** **Bonus**
+>
+> By implementing video stabilization techniques, we can enable the
+> rover to continuously search for ArUco markers without the need to
+> stop, capture images, and detect markers sequentially. This dynamic
+> approach enhances efficiency by allowing the rover to maintain
+> constant movement while actively scanning its surroundings for ArUco
+> markers in real-time, thereby saving valuable time during missions.
+>
+> **2.2** **Strategy-1 : Square Spiral**
+>
+> In this strategy, we will adopt a square-based spiral movement
+> pattern, pausing for detection at corners or edges based on the radial
+> distance from the center. To get more details, check out this section.
+>
+> **2.3** **Strategy-2 : Circle Circle**
+>
+> This strategy involves searching for ArUco markers by moving in a
+> circular pattern, ensuring compre-hensive coverage of the area within
+> two to three rounds. To get more details, check out this section.
+>
+> **3** **Strategy-1 : Square Spiral**
+>
+> In this strategy, we will adopt a square-based spiral movement
+> pattern, pausing for detection at corners or edges based on the radial
+> distance from the center.
 
-![Cameras Setup](image1.png)
+2
 
-**Implementation**
-- To minimize complexity, we'll connect all cameras to a Raspberry Pi, leveraging its existing presence in rover and available pins. The Raspberry Pi will process webcam feeds to detect ArUco tags silently and compactly, ensuring streamlined operation.
-- Upon detecting an ArUco tag, the Raspberry Pi will send a signal to the NUC, the main processing unit, prompting it to rotate the stereo-camera in the tag's direction to capture depth information.
-- Simultaneously, the rover will be directed to move towards the tag's location.
+![](vertopal_a7e145c60f1b4a3baac6e78eac33cdba/media/image2.png){width="1.533332239720035in"
+height="1.534721128608924in"}
 
-**Numbers**
-- The webcam's accuracy for ArUco detection is sufficient, delivering reliable results up to a minimum distance of 10 meters.
-- Given that each camera costs approximately 1k, the overall cost of 3-4k for all cameras is within a reasonable budget range. Therefore, budget constraints are not a significant issue.
+Figure 2: Strategy-1 Illustration
 
-**Pros**
-- Reduce the rotation time of camera/rover.
-- Provides better range than stereo camera. In case, if we are unable to detect the ArUco marker using stereo-camera, we can still move in the direction in which webcam is detecting it.
+> In this approach, the rover will traverse along the edges of a square,
+> gradually increasing the edge
+>
+> length at a constant rate, resulting in a spiral trajectory. described
+> path.
+>
+> Figure 2 illustrates an example of this
+>
+> Based on whether the square index of the edge is even or odd, the
+> rover will stop for detection at corners if the square index is odd,
+> or at points gained after bisecting, trisecting, quadrasacting, etc.,
+> the edge, depending on its length.
+>
+> To see the simulation of the above strategy, check out .
+>
+> **3.1** **Numbers and Calculations**
+>
+> The following provides an overview of the key data points that will
+> influence the strategy:
+>
+> This strategy has 5 main variables:
+>
+> • Initial edge length
+>
+> • Factor determining the rate of increase in square length
+>
+> • Rate at which divisions increase along the edges with an even square
+> index.
+>
+> • Initial Divisions of the edge with an even square index.
+>
+> • Max iterations (edges)
+>
+> Which depends on the factors:
+>
+> • Accuracy of the stereo-camera.
+>
+> • Search range which is 20 m.
+>
+> By assuming a stereo-camera accuracy of 5m, I calibrated the variables
+> accordingly to maximize efficiency. Through this analysis, I
+> determined that within a maximum of 23 edges (or 6 squares), we can
+> effectively cover a range of 20m using this strategy. This process
+> involves the detection of ArUco markers at a maximum of 32 locations.
+> In total, the rover covers approximately 414 meters in distance.
+>
+> For a more detailed understanding and to explore alternative
+> parameters, please refer to simulation script.
+>
+> **3.2** **Pros**
+>
+> • This strategy excels in accuracy for locating ArUco tags, as it
+> searches at very close to near points.
+>
+> • The low numbers of 23 edges and 32 detections indicate high
+> efficiency, especially considering the stereo-camera's minimum 5m
+> accuracy. This strategy is expected to be good time-efficient.
+>
+> • The square-based pattern of this strategy, involving 90-degree
+> turns, simplifies rover's turning process, compared to a spiral
+> pattern.
+>
+> • This strategy aligns with the problem statement by efficiently
+> finding ArUcos in increasing dis- tances from the center, enabling
+> rapid detection of nearby ArUcos.
 
-**Bonus**
-By implementing video stabilization techniques, we can enable the rover to continuously search for ArUco markers without the need to stop, capture images, and detect markers sequentially. This dynamic approach enhances efficiency by allowing the rover to maintain constant movement while actively scanning its surroundings for ArUco markers in real-time, thereby saving valuable time during missions.
+3
 
-### Strategy-1: Square Spiral
-In this strategy, we will adopt a square-based spiral movement pattern, pausing for detection at corners or edges based on the radial distance from the center. To get more details, [check out this section](#strategy-1--square-spiral).
+> **3.3** **Cons**
+>
+> • This strategy exhibits significant overlap in the regions scanned by
+> the stereo-camera, leading to reduced efficiency.
+>
+> • Despite the low number of detections, the rover's travel distance of
+> approximately 400-450 meters may consume a significant amount of time,
+> potentially posing a time challenge.
+>
+> **3.4** **Improvements**
+>
+> As we've identified both advantages and disadvantages of this
+> strategy, we can explore potential im-provements to enhance its
+> effectiveness. One such enhancement could involve introducing an angle
+> between the edges of consecutive squares to minimize overlap.
+> Additionally, we can brainstorm further to optimize the strategy to
+> improve efficiency!
+>
+> **4** **Strategy-2 : Circle Circle**
+>
+> In this strategy, our objective is to systematically scan the area by
+> traversing in circular-like paths around the center, completing 2-3
+> rounds at varying radii. Since direct circular movement is not
+> feasible, we'll instead follow the edges of a polygon with 'n' sides,
+> scanning for ArUco tags at each vertex. This approach creates a
+> pseudo-circular trajectory, mimicking the behavior of a circle for
+> effective coverage.
+>
+> Our approach begins with scanning at the mission's starting point, the
+> center. We then proceed to a vertex of the first polygon inscribed
+> within a circle with a radius of x meters. Moving along the polygon's
+> edges, we scan at each vertex, before transitioning to a larger
+> polygon inscribed within a circle with a radius of y meters (where y
+> *\>*x). This process iterates until we've covered the entire range,
+> ensuring comprehensive area coverage.
+>
+> To see the simulation of the above strategy, check out .
+>
+> **4.1** **Numbers and Calculations**
+>
+> The following provides an overview of the key data points that will
+> influence the strategy:
+>
+> This strategy has 3 main variables:
+>
+> • Number of sides of polygon (n)
+>
+> • Factor for determining the radius of each circle (f)
+>
+> • Number of polygons (2-3)
+>
+> which decides the edge length of the inscribed polygon by having a
+> relation given by:
+>
+> *edge length* = 2 *∗ f ∗ stereo accuracy ∗ sin*(2*π/n*) These
+> variables depends on the factors:
+>
+> • Accuracy of the stereo-camera.
+>
+> • Search range which is 20 m.
 
-### Strategy-2: Circle Circle
-This strategy involves searching for ArUco markers by moving in a circular pattern, ensuring comprehensive coverage of the area within two to three rounds. To get more details, [check out this section](#strategy-2--circle-circle).
+After conducting trial and error experiments, I have identified several
+potential combinations:
 
-## Strategy-1: Square Spiral
-In this strategy, we will adopt a square-based spiral movement pattern, pausing for detection at corners or edges based on the radial distance from the center.
+> • For n = 20 and utilizing 2 polygons, our objective is to create two
+> circles with radii of 2r and 4r respectively, with r being 5m (the
+> accuracy of the stereo-camera). However, due to the circular
+> structure, there will inevitably be some areas left uncovered.
+> Therefore, the actual data obtained is as follows:
+>
+> **--** f1 = 1.9 and f2 = 3.65,
 
-![Strategy-1 Illustration](image2.png)
+4
 
-In this approach, the rover will traverse along the edges of a square, gradually increasing the edge length at a constant rate, resulting in a spiral trajectory. Figure 2 illustrates an example of this described path.
+![](vertopal_a7e145c60f1b4a3baac6e78eac33cdba/media/image3.png){width="1.533332239720035in"
+height="1.3486111111111112in"}
 
-Based on whether the square index of the edge is even or odd, the rover will stop for detection at corners if the square index is odd, or at points gained after bisecting, trisecting, quadrasacting, etc., the edge, depending on its length.
+Figure 3: Strategy-2 Illustration
 
-To see the simulation of the above strategy, check out this [video](#).
+> **--** which gives us a range of 4.5\*r.
+>
+> **--** This implies that for a range of 20 meters, our stereo-camera
+> accuracy must be better than 4.45 meters, which falls within our
+> acceptable range.
+>
+> **--** We will conduct 41 detections and travel a minimum distance of
+> about 172 meters in this strategy.
+>
+> • For n = 20 and using only 1 polygon, the circle should ideally be
+> placed at 2\*r. However, the actual data indicates:
+>
+> **--** f1 = 1.9,\
+> **--** providing a range of 2.75r,\
+> **--** for which we will require a stereo-camera of sensitivity
+> greater than 7.3 m, to cover a range of 20 m.
+>
+> **--** We will conduct 21 detections and travel a minimum distance of
+> about 101 meters in this strategy.
+>
+> • For n = 12 and 2 polygons we should do one circle at 2r and another
+> at 4r. But instead we need to do them at:
+>
+> **--** f1 = 1.85 and f2 = 3.20,\
+> **--** which gives a range of 3.85,\
+> **--** Thus, to get a range of 20 m, we need a stereo-camera of
+> sensitivity greater than 5.2 m.**--** We will conduct 25 detections
+> and travel a minimum distance of about 182 meters in this strategy.
+>
+> For a more detailed understanding and to explore alternative
+> parameters, please refer to simulation script.
+>
+> **4.2** **Pros**\
+> • The numbers indicate that this strategy involves covering a
+> relatively short distance, allowing the rover to move quickly and
+> efficiently.
+>
+> • This strategy is also in alignment with our problem statement as it
+> prioritizes the rapid detection of nearby ArUco markers.
+>
+> • Implementing the strategy within polygons rather than circles
+> facilitates easier control of the rover's movements.
+>
+> • This strategy aims to maximize the utilization of the
+> stereo-camera's full accuracy range, thereby minimizing the time
+> required and enhancing overall efficiency.
 
-**Numbers and Calculations**
-Here I have presented some data related to the above strategy which will help to optimize the strategy and making it more efficient.
-This strategy has 3 main variables:
-- Initial edge length
-- Factor determining the rate of increase in square length
-- Max iterations (edges)
+5
 
-Which depends on the factors:
-- Accuracy of the stereo-camera.
-- Search range which is 20 m.
+> **4.3** **Cons**
+>
+> • The primary challenge of this strategy lies in managing sharp turns.
+> To address this challenge, we opt for fewer edges, allowing for
+> increased turning angles and more effective control. This is crucial
+> as sharp angles may compromise the rover's turning accuracy,
+> potentially leading to errors.
+>
+> • Errors are more likely to occur when attempting to move the rover
+> within the range of 18-30 degrees (for 12-20 edges), potentially
+> resulting in uncovered spots within the 20-meter region.
+>
+> **5** **Conclusion**
+>
+> In summary, both Strategy-1 and Strategy-2 offer significant
+> improvements over the existing approach and can enhance efficiency.
+> Implementing Strategy-0 alongside these strategies will further
+> simplify our task and reduce time requirements. Techniques like video
+> stabilization will greatly aid in ArUco marker detection.
+>
+> Comparing Strategy-1 and Strategy-2, each has its own strengths.
+> Strategy-1 benefits from me-chanical advantages due to its 90-degree
+> turns, while Strategy-2 covers a shorter distance (1/3 of the distance
+> in Strategy-1). Therefore, either strategy can be effectively utilized
+> to streamline our operations.
 
-**Pros**
-**Cons**
-
-## Strategy-2: Circle Circle
-
-## Some examples to get started
-### How to create Sections and Subsections
-Simply use the section and subsection commands, as in this example document! With Overleaf, all the formatting and numbering are handled automatically according to the template you've chosen. If you're using the Visual Editor, you can also create new sections and subsections via the buttons in the editor toolbar.
-
-### How to include Figures
-First, you have to upload the image file from your computer using the upload link in the file-tree menu. Then use the includegraphics command to include it in your document. Use the figure environment and the caption command to add a number and a caption to your figure. See the code for Figure 1 in this section for an example.
-
-Note that your figure will automatically be placed in the most appropriate place for it, given the surrounding text and taking into account other figures or tables that may be close by. You can find out more about adding images to your documents in this help article on [including images on Overleaf](https://www.overleaf.com/learn/how-to/Including_images_on_Overleaf).
-
-### How to add Tables
-Use the table and tabular environments for basic tables --- see Table 1, for example. For more information, please see this help article on [tables](https://www.overleaf.com/learn/latex/tables).
-
-### How to add Comments and Track Changes
-Comments can be added to your project by highlighting some text and clicking "Add comment" in the top right of the editor pane. To view existing comments, click on the Review menu in the toolbar above. To reply to a comment, click on the Reply button in the lower right corner of the comment. You can close the Review pane by clicking its name on the toolbar when you're done reviewing for the time being.
-
-Track changes are available on all our [premium plans](https://www.overleaf.com/user/subscription/plans), and can be toggled on or off using the option at the top of the Review pane. Track changes allow you to keep track of every change made to the document, along with the person making the change.
-
-### How to add Lists
-You can make lists with automatic numbering...
-- Like this,
-- and like this.
-
-...or bullet points...
-- Like this,
-- and like this.
-
-### How to write Mathematics
-LaTeX is great at typesetting mathematics. Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $E[X_i] = \mu$ and $Var[X_i] = \sigma^2 < \infty$, and let
-$$S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
-      = \frac{1}{n}\sum_{i}^{n} X_i$$
-denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
-
-### How to change the margins and paper size
-Usually the template you're using will have the page margins and paper size set correctly for that use-case. For example, if you're using a journal article template provided by the journal publisher, that template will be formatted according to their requirements. In these cases, it's best not to alter the margins directly.
-
-If however you're using a more general template, such as this one, and would like to alter the margins, a common way to do so is via the geometry package. You can find the geometry package loaded in the preamble at the top of this example file, and if you'd like to learn more about how to adjust the settings, please visit this help article on [page size and margins](https://www.overleaf.com/learn/latex/page_size_and_margins).
-
-### How to change the document language and spell check settings
-Overleaf supports many different languages, including multiple different languages within one document.
-
-To configure the document language, simply edit the option provided to the babel package in the preamble at the top of this example project. To learn more about the different options, please visit this help article on [international language support](https://www.overleaf.com/learn/latex/International_language_support).
-
-To change the spell check language, simply open the Overleaf menu at the top left of the editor window, scroll down to the spell check setting, and adjust accordingly.
-
-### How to add Citations and a References List
-You can simply upload a .bib file containing your BibTeX entries, created with a tool such as JabRef. You can then cite entries from it, like this: [@greenwade93]. Just remember to specify a bibliography style, as well as the filename of the .bib. You can find a [video tutorial here](https://www.overleaf.com/help/97-how-to-include-a-bibliography-using-bibtex) to learn more about BibTeX.
-
-If you have an [upgraded account](https://www.overleaf.com/user/subscription/plans), you can also import your Mendeley or Zotero library directly as a .bib file, via the upload menu in the file-tree.
-
-### Good luck!
-We hope you find Overleaf useful, and do take a look at our [help library](https://www.overleaf.com/learn) for more tutorials and user guides! Please also let us know if you have any feedback using the Contact Us link at the bottom of the Overleaf menu --- or use the contact form at [https://www.overleaf.com/contact](https://www.overleaf.com/contact).
+6
