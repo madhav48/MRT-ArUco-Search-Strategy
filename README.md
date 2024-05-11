@@ -47,7 +47,7 @@ In this strategy, we will adopt a square-based spiral movement pattern, pausing 
 
 ### Strategy-2 : Circle Circle
 This strategy involves searching for ArUco markers by moving in a circular pattern, ensuring comprehensive coverage of the area within two to three rounds. 
-[Check out this section](#sec:CC)
+[Check out this section](#CC)
 
 ## Strategy-1 : Square Spiral <a id="SS"></a>
 
@@ -93,7 +93,7 @@ For a more detailed understanding and to explore alternative parameters, please 
 ### Improvements
 As we've identified both advantages and disadvantages of this strategy, we can explore potential improvements to enhance its effectiveness. One such enhancement could involve introducing an angle between the edges of consecutive squares to minimize overlap. Additionally, we can brainstorm further to optimize the strategy to improve efficiency!
 
-## Strategy-2 : Circle Circle <a id="sec:CC"></a>
+## Strategy-2 : Circle Circle <a id="CC"></a>
 
 In this strategy, our objective is to systematically scan the area by traversing in circular-like paths around the center, completing 2-3 rounds at varying radii. Since direct circular movement is not feasible, we'll instead follow the edges of a polygon with 'n' sides, scanning for ArUco tags at each vertex. This approach creates a pseudo-circular trajectory, mimicking the behavior of a circle for effective coverage.
 
