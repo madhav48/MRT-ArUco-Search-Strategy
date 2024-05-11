@@ -43,13 +43,13 @@ In this proposed solution, we aim to utilize 3 or 4 webcams or standard cameras 
 
 ### Strategy-1 : Square Spiral
 In this strategy, we will adopt a square-based spiral movement pattern, pausing for detection at corners or edges based on the radial distance from the center. 
-[Check out this section](#sec:SS)
+[Check out this section](#SS)
 
 ### Strategy-2 : Circle Circle
 This strategy involves searching for ArUco markers by moving in a circular pattern, ensuring comprehensive coverage of the area within two to three rounds. 
 [Check out this section](#sec:CC)
 
-## Strategy-1 : Square Spiral <a id="sec:SS"></a>
+## Strategy-1 : Square Spiral <a id="SS"></a>
 
 In this strategy, we will adopt a square-based spiral movement pattern, pausing for detection at corners or edges based on the radial distance from the center.
 
