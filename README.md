@@ -53,7 +53,7 @@ This strategy involves searching for ArUco markers by moving in a circular patte
 
 In this strategy, we will adopt a square-based spiral movement pattern, pausing for detection at corners or edges based on the radial distance from the center.
 
-![Strategy-1 Illustration](image2.png)
+![Strategy-1 Illustration](images/image2.png)
 
 In this approach, the rover will traverse along the edges of a square, gradually increasing the edge length at a constant rate, resulting in a spiral trajectory. Figure 2 illustrates an example of this described path.
 
