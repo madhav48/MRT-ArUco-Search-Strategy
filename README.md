@@ -25,6 +25,8 @@ To address the mentioned challenges, I suggest the following solutions to simpli
 ### Strategy - 0 : WebCams
 In this proposed solution, we aim to utilize 3 or 4 webcams or standard cameras strategically positioned at angles of either 120° or 90° around the rover. This configuration offers a comprehensive view of the rover's surroundings without the need for camera rotation at each step. By eliminating this rotation process, we effectively reduce the time required for scanning and enhance efficiency in detecting ArUco markers.
 
+![ Cameras Setup (Arrow represents webcam)](images/image1.png)
+
 #### Implementation
 - To minimize complexity, we'll connect all cameras to a Raspberry Pi, leveraging its existing presence in rover and available pins. The Raspberry Pi will process webcam feeds to detect ArUco tags silently and compactly, ensuring streamlined operation.
 - Upon detecting an ArUco tag, the Raspberry Pi will send a signal to the NUC, the main processing unit, prompting it to rotate the stereo-camera in the tag's direction to capture depth information.
@@ -94,6 +96,8 @@ For a more detailed understanding and to explore alternative parameters, please 
 As we've identified both advantages and disadvantages of this strategy, we can explore potential improvements to enhance its effectiveness. One such enhancement could involve introducing an angle between the edges of consecutive squares to minimize overlap. Additionally, we can brainstorm further to optimize the strategy to improve efficiency!
 
 ## Strategy-2 : Circle Circle <a id="CC"></a>
+
+![Strategy-2 Illustration](images/image3.png)
 
 In this strategy, our objective is to systematically scan the area by traversing in circular-like paths around the center, completing 2-3 rounds at varying radii. Since direct circular movement is not feasible, we'll instead follow the edges of a polygon with 'n' sides, scanning for ArUco tags at each vertex. This approach creates a pseudo-circular trajectory, mimicking the behavior of a circle for effective coverage.
 
