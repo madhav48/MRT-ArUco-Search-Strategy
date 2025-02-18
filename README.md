@@ -1,4 +1,4 @@
-# MRT Software Induction Project : Quad-Search Strategy
+# MRT Software Induction Project : ArUco-Search Strategy
 *Madhav Agrawal*
 
 ## Introduction
